@@ -1,41 +1,35 @@
-const http = require('http')
+const express = require('express')
+const app = express()
 const fs = require('fs/promises')
 
 const port = 8000
 
-const requestListener = async (req, res) => {
-    let path = req.url.slice((req.url.lastIndexOf('/')))
+// # Routes
+app.get('/', async (req, res) => {
+    let html = await fs.readFile('./pages/index.html', { encoding: 'utf8' })
+    
+    res.send(html)
+})
 
-    try {
-        switch(path) {
-            case '/':
-                fetchAndSend('./pages/index.html')
-                break;
-            case '/about':
-                fetchAndSend('./pages/about.html')
-                break;
-            case '/contactme':
-                fetchAndSend('./pages/contact-me.html')
-                break;
-            default:
-                fetchAndSend('./pages/404.html')
-                break;
-        }
-    } catch (e) {
-        res
-          .writeHead(404, {'Content-Type': 'text/html'})
-          .end('<p><strong>Something went wrong...</strong></p>')
-    }
+app.get('/about', async (req, res) => {
+    let html = await fs.readFile('./pages/about.html', { encoding: 'utf8' })
+    
+    res.send(html)
+})
 
-    async function fetchAndSend(filePath) {
-        data = await fs.readFile(filePath, { encoding: 'utf8' })
-        res
-          .writeHead(200, {'Content-Type': 'text/html'})
-          .end(data)
-    }
-}
-const server = http.createServer(requestListener)
+app.get('/contactme', async (req, res) => {
+    let html = await fs.readFile('./pages/contact-me.html', { encoding: 'utf8' })
+    
+    res.send(html)
+})
 
-server.listen(port, () => 
-    console.log(`Server running on port ${port}`)
-)
+// 404 route
+app.use(async (req, res, next) => {
+    let html = await fs.readFile('./pages/404.html', { encoding: 'utf8' })
+
+    res.status(404).send(html)
+})
+
+app.listen(port, () => {
+    console.log(`Express app running on port ${port}`)
+})
